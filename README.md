@@ -1,11 +1,10 @@
 # DIR-GNN
-["Discovering Invariant Rationales for Graph Neural Networks"](https://openreview.net/pdf?id=hGXij5rfiHw) (ICLR 2022) aims to train intrinsic interpretable Graph Neural Networks that are generalizable to out-of-distribution datasets. 
+["Discovering Invariant Rationales for Graph Neural Networks"](https://openreview.net/pdf?id=hGXij5rfiHw) (ICLR 2022) aims to train intrinsic interpretable Graph Neural Networks that are generalizable to out-of-distribution datasets. The core of this work lies in the construction of environments, i.e., interventional distributions, and thus discovering the causal features for rationalization.
 
-The core of this work lies in the construction of environments, i.e., interventional distributions, and thus discovering the causal features for rationalization.
-
+<figure> <img src="figures/framework.gif" height="500"></figure>
 
 ## Installation
-- Main: PyTorch >= 1.5.0, Pytorch Geometric >= 1.7.0, OGB >= 1.3.0. 
+- Main packages: PyTorch >= 1.5.0, Pytorch Geometric >= 1.7.0, OGB >= 1.3.0. 
 - See `requirements.txt` for other packages.
 
 ## Data download
@@ -16,12 +15,19 @@ The core of this work lies in the construction of environments, i.e., interventi
 
 
 ## Run DIR
-The hyper-parameters used to train the intrinsic interpretable models are set as default in the `argparse.ArgumentParser` in the training files. Feel free to change them if needed.
-
-We use separate files to train each dataset as the graph convolutional layers of the rationale generators are different.
+The hyper-parameters used to train the intrinsic interpretable models are set as default in the `argparse.ArgumentParser` in the training files. Feel free to change them if needed. We use separate files to train each dataset as the graph convolutional layers of the rationale generators are different.
 
 Simply run `python spmotif_dir.py` to reproduce the results in the paper. 
 
 (TODO)
-## Run Baselines 
-(TODO)
+
+## Reference 
+```
+@inproceedings{
+shirley2022dir,
+title={Discovering Invariant Rationales for Graph Neural Networks},
+author={Ying-Xin Wu and Xiang Wang and An Zhang and Xiangnan He and Tat-seng Chua},
+booktitle={ICLR},
+year={2022},
+}
+```
