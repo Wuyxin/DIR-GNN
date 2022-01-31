@@ -1,8 +1,8 @@
 # DIR-GNN
 ["Discovering Invariant Rationales for Graph Neural Networks"](https://openreview.net/pdf?id=hGXij5rfiHw) (ICLR 2022) aims to train intrinsic interpretable Graph Neural Networks that are generalizable to out-of-distribution datasets. 
 
-The core of this work lies in the construction of environments, i.e., interventional distributions, and thus o discover the causal features for rationalization.
-<figure> <img src="figures/framework.gif" height="500"></figure>
+The core of this work lies in the construction of environments, i.e., interventional distributions, and thus discovering the causal features for rationalization.
+
 
 ## Installation
 - Main: PyTorch >= 1.5.0, Pytorch Geometric >= 1.7.0, OGB >= 1.3.0. 
@@ -22,6 +22,6 @@ We use separate files to train each dataset as the graph convolutional layers of
 
 Simply run `python spmotif_dir.py` to reproduce the results in the paper. 
 
-
+(TODO)
 ## Run Baselines 
 (TODO)
