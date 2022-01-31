@@ -1,0 +1,145 @@
+anyio==3.4.0
+anykeystore==0.2
+argcomplete @ file:///tmp/build/80754af9/argcomplete_1618920853202/work
+argon2-cffi==21.3.0
+argon2-cffi-bindings==21.2.0
+async-generator @ file:///home/ktietz/src/ci/async_generator_1611927993394/work
+attrs @ file:///tmp/build/80754af9/attrs_1620827162558/work
+Babel==2.9.1
+backcall @ file:///home/ktietz/src/ci/backcall_1611930011877/work
+bleach==4.1.0
+certifi==2021.10.8
+cffi @ file:///tmp/build/80754af9/cffi_1636541929935/work
+charset-normalizer==2.0.9
+click==8.0.3
+cryptacular==1.6.2
+cycler==0.11.0
+debugpy @ file:///tmp/build/80754af9/debugpy_1637091426235/work
+decorator @ file:///tmp/build/80754af9/decorator_1632776554403/work
+deepsnap==0.2.1
+defusedxml @ file:///tmp/build/80754af9/defusedxml_1615228127516/work
+entrypoints==0.3
+filelock==3.4.0
+fonttools==4.28.5
+googledrivedownloader==0.4
+graphviz==0.19.1
+greenlet==1.1.2
+huggingface-hub==0.2.1
+hupper==1.10.3
+idna==3.3
+importlib-metadata==4.9.0
+importlib-resources==5.4.0
+ipdb==0.13.9
+ipykernel==6.6.0
+ipython==7.30.1
+ipython-genutils @ file:///tmp/build/80754af9/ipython_genutils_1606773439826/work
+isodate==0.6.1
+jedi==0.18.1
+Jinja2==3.0.3
+joblib==1.1.0
+json5==0.9.6
+jsonschema==4.3.1
+jupyter-client==7.1.0
+jupyter-core @ file:///tmp/build/80754af9/jupyter_core_1636537035214/work
+jupyter-server==1.13.1
+jupyterlab==3.2.5
+jupyterlab-pygments @ file:///tmp/build/80754af9/jupyterlab_pygments_1601490720602/work
+jupyterlab-server==2.9.0
+kiwisolver==1.3.2
+littleutils==0.2.2
+MarkupSafe @ file:///tmp/build/80754af9/markupsafe_1621528142364/work
+matplotlib==3.5.1
+matplotlib-inline==0.1.3
+mistune @ file:///tmp/build/80754af9/mistune_1594373098390/work
+mkl-fft==1.3.1
+mkl-random @ file:///tmp/build/80754af9/mkl_random_1626179032232/work
+mkl-service==2.4.0
+nb-conda==2.2.1
+nb-conda-kernels @ file:///tmp/build/80754af9/nb_conda_kernels_1606775986548/work
+nbclassic==0.3.4
+nbclient==0.5.9
+nbconvert==6.3.0
+nbformat @ file:///tmp/build/80754af9/nbformat_1617383369282/work
+nest-asyncio==1.5.4
+networkx==2.6.3
+notebook @ file:///tmp/build/80754af9/notebook_1637161768398/work
+numpy @ file:///tmp/build/80754af9/numpy_and_numpy_base_1634106693478/work
+oauthlib==3.1.1
+ogb==1.3.1
+olefile @ file:///Users/ktietz/demo/mc3/conda-bld/olefile_1629805411829/work
+outdated==0.2.1
+packaging @ file:///tmp/build/80754af9/packaging_1637314298585/work
+pandas==1.1.5
+pandocfilters==1.5.0
+parso==0.8.3
+PasteDeploy==2.1.1
+pbkdf2==1.3
+pexpect @ file:///tmp/build/80754af9/pexpect_1605563209008/work
+pickleshare @ file:///tmp/build/80754af9/pickleshare_1606932040724/work
+Pillow==8.4.0
+plaster==1.0
+plaster-pastedeploy==0.7
+prometheus-client @ file:///tmp/build/80754af9/prometheus_client_1637050397234/work
+prompt-toolkit==3.0.24
+protobuf==3.19.1
+ptyprocess @ file:///tmp/build/80754af9/ptyprocess_1609355006118/work/dist/ptyprocess-0.7.0-py2.py3-none-any.whl
+pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
+pydot==1.4.2
+Pygments @ file:///tmp/build/80754af9/pygments_1629234116488/work
+pyparsing==3.0.6
+pyramid==2.0
+pyramid-mailer==0.15.1
+pyrsistent @ file:///tmp/build/80754af9/pyrsistent_1636098896055/work
+python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+python3-openid==3.2.0
+pytz==2021.3
+PyYAML==6.0
+pyzmq @ file:///tmp/build/80754af9/pyzmq_1638434924971/work
+rdflib==6.0.2
+regex==2021.11.10
+repoze.sendmail==4.4.1
+requests==2.26.0
+requests-oauthlib==1.3.0
+sacremoses==0.0.46
+scikit-learn==1.0.1
+scipy==1.7.3
+Send2Trash @ file:///tmp/build/80754af9/send2trash_1632406701022/work
+six @ file:///tmp/build/80754af9/six_1623709665295/work
+sniffio==1.2.0
+SQLAlchemy==1.4.28
+tensorboardX==2.4.1
+terminado==0.12.1
+testpath @ file:///tmp/build/80754af9/testpath_1624638946665/work
+texttable==1.6.4
+threadpoolctl==3.0.0
+tokenizers==0.10.3
+toml==0.10.2
+torch==1.8.2
+torch-cluster @ file:///storage/yxiwu/torch_cluster-1.5.9-cp37-cp37m-linux_x86_64.whl
+torch-geometric==2.0.2
+torch-scatter @ file:///storage/yxiwu/torch_scatter-2.0.6-cp37-cp37m-linux_x86_64.whl
+torch-sparse==0.6.12
+torch-spline-conv @ file:///storage/yxiwu/torch_spline_conv-1.2.1-cp37-cp37m-linux_x86_64.whl
+torchaudio==0.8.2
+torchvision==0.9.2
+tornado @ file:///tmp/build/80754af9/tornado_1606942283357/work
+tqdm==4.62.3
+traitlets @ file:///tmp/build/80754af9/traitlets_1636710298902/work
+transaction==3.0.1
+transformers==4.14.1
+translationstring==1.4
+typing-extensions @ file:///tmp/build/80754af9/typing_extensions_1631814937681/work
+urllib3==1.26.7
+velruse==1.1.1
+venusian==3.0.0
+wcwidth @ file:///Users/ktietz/demo/mc3/conda-bld/wcwidth_1629357192024/work
+webencodings==0.5.1
+WebOb==1.8.7
+websocket-client==1.2.3
+WTForms==3.0.0
+wtforms-recaptcha==0.3.2
+yacs==0.1.8
+zipp @ file:///tmp/build/80754af9/zipp_1633618647012/work
+zope.deprecation==4.4.0
+zope.interface==5.4.0
+zope.sqlalchemy==1.6
