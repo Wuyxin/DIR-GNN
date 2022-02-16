@@ -7,7 +7,6 @@ spmotif_gen/__pycache__/
 data/
 dataset/
 local/
+local_/
 
 molhiv_dir.py
-mnistsp_dir.py
-sst2_dir.py

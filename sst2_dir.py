@@ -1,13 +1,12 @@
 import copy
 import torch
 import argparse
-from datasets import SPMotif
 from torch_geometric.data import DataLoader
 
 
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import LEConv, BatchNorm, fps
+from torch_geometric.nn import ARMAConv
 from utils.mask import set_masks, clear_masks
 
 import os
@@ -18,16 +17,15 @@ from utils.logger import Logger
 from datetime import datetime
 from utils.helper import set_seed, args_print
 from utils.get_subgraph import split_batch, relabel
-from gnn import SPMotifNet
-
-
+from datasets.graphss2_dataset import get_dataset, get_dataloader  
+from gnn import GraphSST2Net
 
 class CausalAttNet(nn.Module):
     
     def __init__(self, causal_ratio):
         super(CausalAttNet, self).__init__()
-        self.conv1 = LEConv(in_channels=4, out_channels=args.channels)
-        self.conv2 = LEConv(in_channels=args.channels, out_channels=args.channels)
+        self.conv1 = ARMAConv(in_channels=768, out_channels=args.channels)
+        self.conv2 = ARMAConv(in_channels=args.channels, out_channels=args.channels)
         self.mlp = nn.Sequential(
             nn.Linear(args.channels*2, args.channels*4),
             nn.ReLU(),
@@ -36,7 +34,6 @@ class CausalAttNet(nn.Module):
         self.ratio = causal_ratio
     
     def forward(self, data):
-        # batch_norm
         x = F.relu(self.conv1(data.x, data.edge_index, data.edge_attr.view(-1)))
         x = self.conv2(x, data.edge_index, data.edge_attr.view(-1))
 
@@ -76,43 +73,47 @@ class CausalAttNet(nn.Module):
                 pred_edge_weight
 
 if __name__ == "__main__":
-        
+
     parser = argparse.ArgumentParser(description='Training for Causal Feature Learning')
     parser.add_argument('--cuda', default=0, type=int, help='cuda device')
     parser.add_argument('--datadir', default='data/', type=str, help='directory for datasets.')
     parser.add_argument('--epoch', default=400, type=int, help='training iterations')
     parser.add_argument('--reg', default=1, type=int)
     parser.add_argument('--seed',  nargs='?', default='[1]', help='random seed')
-    parser.add_argument('--channels', default=32, type=int, help='width of network')
+    parser.add_argument('--channels', default=128, type=int, help='width of network')
     parser.add_argument('--commit', default='', type=str, help='experiment name')
-    parser.add_argument('--bias', default='0.9', type=str, help='select bias extend')
+    parser.add_argument('--type', default='none', type=str, choices=['none', 'micro', 'macro'])
     # hyper 
-    parser.add_argument('--pretrain', default=10, type=int, help='pretrain epoch')
-    parser.add_argument('--alpha', default=1e-2, type=float, help='invariant loss')
-    parser.add_argument('--r', default=0.25, type=float, help='causal_ratio')
+    parser.add_argument('--pretrain', default=0, type=int, help='pretrain epoch')
+    parser.add_argument('--alpha', default=10, type=float, help='invariant loss')
+    parser.add_argument('--r', default=0.6, type=float, help='causal_ratio')
     # basic
     parser.add_argument('--batch_size', default=32, type=int, help='batch size')
-    parser.add_argument('--net_lr', default=1e-3, type=float, help='learning rate for the predictor')
+    parser.add_argument('--net_lr', default=2*1e-4, type=float, help='learning rate for the predictor')
     args = parser.parse_args()
     args.seed = eval(args.seed)
+
+
     # dataset
-    num_classes = 3
+    num_classes = 2
     device = torch.device('cuda:%d' % args.cuda if torch.cuda.is_available() else 'cpu') 
-    train_dataset = SPMotif(osp.join(args.datadir, f'SPMotif-{args.bias}/'), mode='train')
-    val_dataset = SPMotif(osp.join(args.datadir, f'SPMotif-{args.bias}/'), mode='val')
-    test_dataset = SPMotif(osp.join(args.datadir, f'SPMotif-{args.bias}/'), mode='test')
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
-    n_train_data, n_val_data = len(train_dataset), len(val_dataset)
-    n_test_data = float(len(test_dataset))
+    dataset = get_dataset(dataset_dir='data/', dataset_name='Graph_SST2', task=None)
+    dataloader = get_dataloader(dataset,  
+                                batch_size=args.batch_size,
+                                degree_bias=True, 
+                                seed=args.seed)    
+    train_loader = dataloader['train']
+    val_loader = dataloader['eval'] 
+    test_loader = dataloader['test']
+    n_train_data, n_val_data = len(train_loader.dataset), len(val_loader.dataset)
+    n_test_data = float(len(test_loader.dataset))
 
     # log
     datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
-    all_info = { 'causal_acc':[], 'conf_acc':[], 'train_acc':[], 'val_acc':[], 'test_prec':[], 'train_prec':[], 'test_mrr':[], 'train_mrr':[]}
-    experiment_name = f'spmotif-{args.bias}.{bool(args.reg)}.{args.commit}.netlr_{args.net_lr}.batch_{args.batch_size}.channels_{args.channels}.pretrain_{args.pretrain}.r_{args.r}.alpha_{args.alpha}.seed_{args.seed}.{datetime_now}'
+    all_info = { 'causal_acc':[], 'conf_acc':[], 'train_acc':[], 'val_acc':[]}
+    experiment_name = f'graphsst2.{args.type}.{bool(args.reg)}.{args.commit}.netlr_{args.net_lr}.batch_{args.batch_size}.channels_{args.channels}.pretrain_{args.pretrain}.r_{args.r}.alpha_{args.alpha}.seed_{args.seed}.{datetime_now}'
     exp_dir = osp.join('local/', experiment_name)
-    os.makedirs(exp_dir, exist_ok=True)
+    os.mkdir(exp_dir)
     logger = Logger.init_logger(filename=exp_dir + '/_output_.log')
     args_print(args, logger)
 
@@ -120,16 +121,14 @@ if __name__ == "__main__":
         
         set_seed(seed)
         # models and optimizers
-        g = SPMotifNet(args.channels).to(device)
+        g = GraphSST2Net(args.channels).to(device)
         att_net = CausalAttNet(args.r).to(device)
         model_optimizer = torch.optim.Adam(
-            list(g.node_emb.parameters()) +
-            list(g.convs.parameters()) +
-            list(g.relus.parameters()) +
+            list(g.parameters()) +
             list(g.causal_mlp.parameters()) +
             list(att_net.parameters()),
             lr=args.net_lr)
-        conf_opt = torch.optim.Adam(g.conf_fw.parameters(), lr=args.net_lr)
+        conf_opt = torch.optim.Adam(g.conf_mlp.parameters(), lr=args.net_lr)
         CELoss = nn.CrossEntropyLoss(reduction="mean")
         EleCELoss = nn.CrossEntropyLoss(reduction="none")
 
@@ -139,50 +138,12 @@ if __name__ == "__main__":
         def val_mode():
             g.eval();att_net.eval()
 
-        def test_metrics(loader, att_net):
-            def metrics_batch(graph, pred_weight, mrr_k=5):
-                _, _, _, num_edges, cum_edges = split_batch(graph)
-                ground_truth_mask = graph.edge_gt_att.view(-1)
-                
-                precision, mrr = [], []
-                for E, C in zip(num_edges.tolist(), cum_edges.tolist()):
-                    # compute precision
-                    num_gd = int(ground_truth_mask[C: C + E].sum())
-                    pred = pred_weight[C:C + E]
-                    _, indices_for_sort = pred.sort(descending=True, dim=-1)
-                    idx = indices_for_sort[:num_gd].detach().cpu().numpy()
-                    precision.append(ground_truth_mask[C: C + E][idx].sum().float()/num_gd)
-                    
-                    # compute mrr
-                    k = min(pred.size(0), mrr_k)
-                    true_sorted_by_preds = torch.gather(
-                        graph.edge_gt_att[C: C + E], dim=-1, index=indices_for_sort
-                    )
-                    true_sorted_by_pred_shrink = true_sorted_by_preds[:k]
-                    values, indices = torch.max(true_sorted_by_pred_shrink, dim=0)
-                    indices = indices.type_as(values).unsqueeze(dim=0).t()
-                    result = torch.tensor(1.0) / (indices + torch.tensor(1.0))
-                    zero_sum_mask = values == 0.0
-                    result[zero_sum_mask] = 0.0
-                    mrr.append(result[0])
-                return torch.tensor(precision), torch.tensor(mrr)
-
-            precision_lst, mrr_lst =  torch.FloatTensor([]), torch.FloatTensor([])
-            for graph in loader: 
-                graph.to(device)
-                causal_g, conf_g, pred_edge_weight = att_net(graph)
-                precision, mrr = metrics_batch(graph, pred_edge_weight)
-                precision_lst = torch.cat([precision_lst, precision])
-                mrr_lst = torch.cat([mrr_lst, mrr])
-            return torch.mean(precision_lst), torch.mean(mrr_lst)
-            
         def test_acc(loader, att_net, predictor):
             acc = 0
             for graph in loader: 
                 graph.to(device)
                 
-                (causal_x, causal_edge_index, causal_edge_attr, causal_edge_weight, causal_batch),\
-                (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch), pred_edge_weight = att_net(graph)
+                (causal_x, causal_edge_index, causal_edge_attr, causal_edge_weight, causal_batch), _, _ = att_net(graph)
                 set_masks(causal_edge_weight, g)
                 out = predictor(x=causal_x, edge_index=causal_edge_index, 
                         edge_attr=causal_edge_attr, batch=causal_batch)
@@ -202,7 +163,6 @@ if __name__ == "__main__":
             alpha_prime = args.alpha * (epoch ** 1.6)
             all_loss, n_bw, all_env_loss = 0, 0, 0
             all_causal_loss, all_conf_loss, all_var_loss = 0, 0, 0
-            dummy_w = nn.Parameter(torch.Tensor([1.0])).to(device)
             train_mode()
             for graph in train_loader:
                 n_bw += 1
@@ -229,36 +189,34 @@ if __name__ == "__main__":
                 env_loss = 0
                 if args.reg:
                     env_loss = torch.tensor([]).to(device)
-                    for conf in conf_rep:
-                        rep_out = g.get_comb_pred(causal_rep, conf)
-                        env_loss = torch.cat([env_loss, CELoss(rep_out, graph.y).unsqueeze(0)])
-                    causal_loss += alpha_prime * env_loss.mean()
-                    env_loss = alpha_prime * torch.var(env_loss * conf_rep.size(0))
-
+                    for idx, causal in enumerate(causal_rep):
+                        rep_out = g.get_comb_pred(causal, conf_rep)
+                        tmp = EleCELoss(rep_out, graph.y[idx].repeat(rep_out.size(0)))
+                        causal_loss += alpha_prime * tmp.mean() / causal_rep.size(0)
+                        env_loss = torch.cat([env_loss, torch.var(tmp).unsqueeze(0)])
+                    env_loss = alpha_prime * env_loss.mean()
+                
                 # logger
                 all_conf_loss += conf_loss
                 all_causal_loss += causal_loss
                 all_env_loss += env_loss
                 causal_edge_weights = torch.cat([causal_edge_weights, causal_edge_weight])
                 conf_edge_weights = torch.cat([conf_edge_weights, conf_edge_weight])
+                
+                conf_opt.zero_grad()
+                conf_loss.backward()
+                conf_opt.step()
 
+                model_optimizer.zero_grad()
+                (causal_loss + env_loss).backward()
+                model_optimizer.step()
+                
             all_env_loss /= n_bw
             all_causal_loss /= n_bw
-            all_conf_loss /= n_bw
             all_loss = all_causal_loss + all_env_loss
-
-            conf_opt.zero_grad()
-            all_conf_loss.backward()
-            conf_opt.step()
-
-            model_optimizer.zero_grad()
-            all_loss.backward()
-            model_optimizer.step()
             torch.cuda.empty_cache()
             val_mode()
             with torch.no_grad():
-                test_prec, test_mrr = test_metrics(test_loader, att_net)
-                train_prec, train_mrr = test_metrics(train_loader, att_net)
 
                 train_acc = test_acc(train_loader, att_net, g)
                 val_acc = test_acc(val_loader, att_net, g)
@@ -283,10 +241,9 @@ if __name__ == "__main__":
                         
                 logger.info("Epoch [{:3d}/{:d}]  all_loss:{:2.3f}=[XE:{:2.3f}  IL:{:2.6f}]  "
                             "Train_ACC:{:.3f} Test_ACC[{:.3f}  {:.3f}]  Val_ACC:{:.3f}  "
-                            "Prec[{:.3f}  {:.3f}]  MRR[{:.4f}  {:.4f}]  stats[{:.3f}  {:.3f}]".format(
-                        epoch, args.epoch, all_loss, all_causal_loss, all_env_loss, 
+                            "stats[{:.3f}  {:.3f}]".format(
+                        epoch, args.epoch, all_loss, all_causal_loss, env_loss, 
                         train_acc, causal_acc, conf_acc, val_acc,
-                        test_prec, train_prec, test_mrr, train_mrr,
                         causal_edge_weights.mean(), conf_edge_weights.mean()))
             
                 # activate early stopping
@@ -305,23 +262,14 @@ if __name__ == "__main__":
         all_info['conf_acc'].append(conf_acc)
         all_info['train_acc'].append(train_acc)
         all_info['val_acc'].append(val_acc)
-        all_info['test_prec'].append(test_prec)
-        all_info['train_prec'].append(train_prec)
-        all_info['test_mrr'].append(test_mrr)
-        all_info['train_mrr'].append(train_mrr)
         torch.save(g.cpu(), osp.join(exp_dir, 'predictor-%d.pt' % seed))
         torch.save(att_net.cpu(), osp.join(exp_dir, 'attention_net-%d.pt' % seed))
         logger.info("=" * 100)
 
-    logger.info("Causal ACC:{:.4f}-+-{:.4f}  Conf ACC:{:.4f}-+-{:.4f}  Train ACC:{:.4f}-+-{:.4f}  Val ACC:{:.4f}-+-{:.4f}  "
-                "Test Prec:{:.4f}-+-{:.4f}   Train Prec:{:.4f}-+-{:.4f}  Test MRR:{:.4f}-+-{:.4f}   Train MRR:{:.4f}-+-{:.4f}  ".format(
+    logger.info("Causal ACC:{:.4f}-+-{:.4f}  Conf ACC:{:.4f}-+-{:.4f}  Train ACC:{:.4f}-+-{:.4f}  Val ACC:{:.4f}-+-{:.4f}".format(
                     torch.tensor(all_info['causal_acc']).mean(), torch.tensor(all_info['causal_acc']).std(),
                     torch.tensor(all_info['conf_acc']).mean(), torch.tensor(all_info['conf_acc']).std(),
                     torch.tensor(all_info['train_acc']).mean(), torch.tensor(all_info['train_acc']).std(),
-                    torch.tensor(all_info['val_acc']).mean(), torch.tensor(all_info['val_acc']).std(),
-                    torch.tensor(all_info['test_prec']).mean(), torch.tensor(all_info['test_prec']).std(),
-                    torch.tensor(all_info['train_prec']).mean(), torch.tensor(all_info['train_prec']).std(),
-                    torch.tensor(all_info['test_mrr']).mean(), torch.tensor(all_info['test_mrr']).std(),
-                    torch.tensor(all_info['train_mrr']).mean(), torch.tensor(all_info['train_mrr']).std()
+                    torch.tensor(all_info['val_acc']).mean(), torch.tensor(all_info['val_acc']).std()
                 ))
             
