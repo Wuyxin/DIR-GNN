@@ -18,6 +18,7 @@
     Here is the simple philosophy: *No matter what values we assign to the non-causal part, the class label is invariant as long as we observe the causal part*. 
     Intuitively, interventional distributions offer us "multiple eyes" to discover the features that make the label invariant upon interventions. And we propose the DIR objective to achieve this goal
     <figure> <img src="figures/dir-objective.png" height="50"></figure>
+    
     See our paper for the formal description and the principle behind it. 
 
 
