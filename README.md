@@ -1,5 +1,5 @@
 # DIR-GNN
-[**"Discovering Invariant Rationales for Graph Neural Networks"**](https://openreview.net/pdf?id=hGXij5rfiHw) (ICLR 2022) aims to train intrinsic interpretable Graph Neural Networks that are robust and generalizable to out-of-distribution datasets. The core of this work lies in the construction of interventional distributions, from which causal features are identified. See the **quick lead-in** $\downarrow$.
+[**"Discovering Invariant Rationales for Graph Neural Networks"**](https://openreview.net/pdf?id=hGXij5rfiHw) (ICLR 2022) aims to train intrinsic interpretable Graph Neural Networks that are robust and generalizable to out-of-distribution datasets. The core of this work lies in the construction of interventional distributions, from which causal features are identified. See the **quick lead-in** below.
 
 - **Q: What are interventional distributions?**
   
