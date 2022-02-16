@@ -4,13 +4,13 @@
 - **Q: What are interventional distributions?**
   
   They are basically the distributions when we intervene on one variable or a set of variables in the data generation process. For example, we could intervene on the base graph (highlighted in green or blue), which gives us multiple distributions:
-    <figure> <img src="figures/interventional-distributions.png" height="250"></figure>
+    <figure> <img src="figures/interventional-distributions.png" height="220"></figure>
     
 
 - **Q: How to construct the interventional distributions?**    
     We design the following model structure to do the intervention in the representation space, where the distribution intervener is in charge of sampling one subgraph from the non-causal pool and fixing it at one end of the rationale generator.
 
-    <figure> <img src="figures/framework.gif" height="300"></figure>
+    <figure> <img src="figures/framework.gif" height="350"></figure>
 
 
 - **Q: How can these interventional distributions help us approach the causal features for rationalization?**
