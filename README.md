@@ -3,20 +3,24 @@
 
 - **Q: What are interventional distributions?**
   
-  They are basically the distributions when we intervene on one variable or a set of variables in the data generation process. For example, we could intervene on the base graph, which gives us multiple distributions:
-    <figure> <img src="figures/interventional-distributions.png" height="300"></figure>
+  They are basically the distributions when we intervene on one variable or a set of variables in the data generation process. For example, we could intervene on the base graph (highlighted in green or blue), which gives us multiple distributions:
+    <figure> <img src="figures/interventional-distributions.png" height="200"></figure>
     
 
-- **Q: How to construct the interventional distributions?**
-    
-    We design the following model structure to do the intervention in the representation space, where $g$ are graphs, $\tilde{s}$ are non-causal parts, and $\tilde{c}$ are causal parts.
+- **Q: How to construct the interventional distributions?**    
+    We design the following model structure to do the intervention in the representation space, where $g$ are graphs, $\{\tilde{s}\}$ are non-causal parts, and $\{\tilde{c}\}$ are causal parts. The distribution intervener is in charge of sampling one subgraph $\tilde{s}$ from the pool $\{\tilde{s}\}$ and fixing it at one end of the rationale generator.
 
-<figure> <img src="figures/framework.gif" height="400"></figure>
+<figure> <img src="figures/framework.gif" height="300"></figure>
 
 
 - **Q: How can these interventional distributions help us approach the causal features for rationalization?**
+    
+    Here is the simple philosophy: <font color=Blue>No matter what values we assign to the non-causal part, the class label is invariant as long as we observe the causal part </font>. 
+    Intuitively, interventional distributions offer us "multiple eyes" to discover the features that make the label invariant upon interventions. And we propose the DIR objective to achieve this goal:
 
-Here is the simple philosophy: **No matter what values we assign to the non-causal part, the class label is invariant as long as we observe the causal part**. Intuitively, interventional distributions offer us "multiple eyes" to discover the features that make the label invariant upon interventions. See our paper for the formal principle and objective $\mathcal{R}_{\text{DIR}}$.
+    $\mathcal{R}_{\text{DIR}} = \mathbb{E}_{s}[\mathcal{R}(h(G),Y|do(S=s))] + \lambda \text{Var}_{s}(\{\mathcal{R}(h(G),Y|do(S=s))\})$
+    
+    See our paper for the formal description and the principle behind it. 
 
 
 
