@@ -18,7 +18,7 @@
     Here is the simple philosophy: *No matter what values we assign to the non-causal part, the class label is invariant as long as we observe the causal part*. 
     Intuitively, interventional distributions offer us "multiple eyes" to discover the features that make the label invariant upon interventions. And we propose the DIR objective to achieve this goal
     <figure> <img src="figures/dir-objective.png" height="50"></figure>
-    
+
     See our paper for the formal description and the principle behind it. 
 
 
@@ -31,13 +31,11 @@
 - Spurious-Motif: this dataset can be generated via `spmotif_gen/spmotif.ipynb`. 
 - [Graph-SST2](https://github.com/divelab/DIG/tree/main/dig/xgraph/datasets): this dataset can be downloaded [here](https://mailustceducn-my.sharepoint.com/personal/yhy12138_mail_ustc_edu_cn/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fyhy12138%5Fmail%5Fustc%5Fedu%5Fcn%2FDocuments%2Fpaper%5Fwork%2FGNN%20Explainability%20Survey%2FSurvey%5FText2graph%2FGraph%2DSST2%2Ezip&parent=%2Fpersonal%2Fyhy12138%5Fmail%5Fustc%5Fedu%5Fcn%2FDocuments%2Fpaper%5Fwork%2FGNN%20Explainability%20Survey%2FSurvey%5FText2graph).
 - [MNIST-75sp](https://github.com/bknyaz/graph_attention_pool): this dataset can be downloaded [here](https://drive.google.com/drive/folders/1Prc-n9Nr8-5z-xphdRScftKKIxU4Olzh). Download `mnist_75sp_train.pkl`, `mnist_75sp_test.pkl`, and `mnist_75sp_color_noise.pt` to the directory `data/MNISTSP/raw/`.
-- [OGBG-Molhiv](https://ogb.stanford.edu/docs/graphprop/#ogbg-mol): this dataset will be downloaded automatically.
-
 
 ## Run DIR
 The hyper-parameters used to train the intrinsic interpretable models are set as default in the `argparse.ArgumentParser` in the training files. Feel free to change them if needed. We use separate files to train each dataset.
 
-Simply run `python {dataset}_dir.py` to reproduce the results in the paper. 
+Simply run `python -m train.{dataset}_dir` to reproduce the results in the paper. 
 
 
 ## Reference 
