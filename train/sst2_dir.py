@@ -17,7 +17,7 @@ from utils.logger import Logger
 from datetime import datetime
 from utils.helper import set_seed, args_print
 from utils.get_subgraph import split_batch, relabel
-from datasets.graphss2_dataset import get_dataset, get_dataloader  
+from datasets.graphsst2_dataset import get_dataset, get_dataloader  
 from gnn import GraphSST2Net
 
 class CausalAttNet(nn.Module):
