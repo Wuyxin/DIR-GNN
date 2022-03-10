@@ -41,10 +41,10 @@ Simply run `python -m train.{dataset}_dir` to reproduce the results in the paper
 ## Reference 
 ```
 @inproceedings{
-shirley2022dir,
-title={Discovering Invariant Rationales for Graph Neural Networks},
-author={Ying-Xin Wu and Xiang Wang and An Zhang and Xiangnan He and Tat-seng Chua},
-booktitle={ICLR},
-year={2022},
+    wu2022dir,
+    title={Discovering Invariant Rationales for Graph Neural Networks},
+    author={Ying-Xin Wu and Xiang Wang and An Zhang and Xiangnan He and Tat-seng Chua},
+    booktitle={ICLR},
+    year={2022},
 }
 ```
