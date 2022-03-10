@@ -16,7 +16,7 @@ from torch.autograd import grad
 from utils.logger import Logger
 from datetime import datetime
 from utils.helper import set_seed, args_print
-from utils.get_subgraph import split_batch, relabel
+from utils.get_subgraph import split_graph, relabel
 from datasets.graphsst2_dataset import get_dataset, get_dataloader  
 from gnn import GraphSST2Net
 
@@ -36,41 +36,20 @@ class CausalAttNet(nn.Module):
     def forward(self, data):
         x = F.relu(self.conv1(data.x, data.edge_index, data.edge_attr.view(-1)))
         x = self.conv2(x, data.edge_index, data.edge_attr.view(-1))
-
+        
         row, col = data.edge_index
         edge_rep = torch.cat([x[row], x[col]], dim=-1)
-        pred_edge_weight = self.mlp(edge_rep).view(-1)
+        edge_score = self.mlp(edge_rep).view(-1)
 
-        causal_edge_index = torch.LongTensor([[],[]]).to(data.x.device)
-        causal_edge_weight = torch.tensor([]).to(data.x.device)
-        causal_edge_attr = torch.tensor([]).to(data.x.device)
-        conf_edge_index = torch.LongTensor([[],[]]).to(data.x.device)
-        conf_edge_weight = torch.tensor([]).to(data.x.device)
-        conf_edge_attr = torch.tensor([]).to(data.x.device)
+        (causal_edge_index, causal_edge_attr, causal_edge_weight), \
+        (conf_edge_index, conf_edge_attr, conf_edge_weight) = split_graph(data,edge_score, self.ratio)
 
-        edge_indices, _, _, num_edges, cum_edges = split_batch(data)
-        for edge_index, N, C in zip(edge_indices, num_edges, cum_edges):
-            n_reserve =  int(self.ratio * N)
-            edge_attr = data.edge_attr[C:C+N]
-            single_mask = pred_edge_weight[C:C+N]
-            single_mask_detach = pred_edge_weight[C:C+N].detach().cpu().numpy()
-            rank = np.argpartition(-single_mask_detach, n_reserve)
-            idx_reserve, idx_drop = rank[:n_reserve], rank[n_reserve:]
-
-            causal_edge_index = torch.cat([causal_edge_index, edge_index[:, idx_reserve]], dim=1)
-            conf_edge_index = torch.cat([conf_edge_index, edge_index[:, idx_drop]], dim=1)
-
-            causal_edge_weight = torch.cat([causal_edge_weight, single_mask[idx_reserve]])
-            conf_edge_weight = torch.cat([conf_edge_weight,  -1 * single_mask[idx_drop]])
-
-            causal_edge_attr = torch.cat([causal_edge_attr, edge_attr[idx_reserve]])
-            conf_edge_attr = torch.cat([conf_edge_attr, edge_attr[idx_drop]])
         causal_x, causal_edge_index, causal_batch, _ = relabel(x, causal_edge_index, data.batch)
         conf_x, conf_edge_index, conf_batch, _ = relabel(x, conf_edge_index, data.batch)
 
         return (causal_x, causal_edge_index, causal_edge_attr, causal_edge_weight, causal_batch),\
                 (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch),\
-                pred_edge_weight
+                edge_score
 
 if __name__ == "__main__":
 
@@ -125,7 +104,6 @@ if __name__ == "__main__":
         att_net = CausalAttNet(args.r).to(device)
         model_optimizer = torch.optim.Adam(
             list(g.parameters()) +
-            list(g.causal_mlp.parameters()) +
             list(att_net.parameters()),
             lr=args.net_lr)
         conf_opt = torch.optim.Adam(g.conf_mlp.parameters(), lr=args.net_lr)
@@ -169,7 +147,7 @@ if __name__ == "__main__":
                 graph.to(device)
                 N = graph.num_graphs
                 (causal_x, causal_edge_index, causal_edge_attr, causal_edge_weight, causal_batch),\
-                (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch), pred_edge_weight = att_net(graph)
+                (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch), edge_score = att_net(graph)
 
                 set_masks(causal_edge_weight, g)
                 causal_rep = g.get_graph_rep(
@@ -214,7 +192,6 @@ if __name__ == "__main__":
             all_env_loss /= n_bw
             all_causal_loss /= n_bw
             all_loss = all_causal_loss + all_env_loss
-            torch.cuda.empty_cache()
             val_mode()
             with torch.no_grad():
 
@@ -225,7 +202,7 @@ if __name__ == "__main__":
                 for graph in test_loader: 
                     graph.to(device)
                     (causal_x, causal_edge_index, causal_edge_attr, causal_edge_weight, causal_batch),\
-                    (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch), pred_edge_weight = att_net(graph)
+                    (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch), edge_score = att_net(graph)
                     
                     set_masks(causal_edge_weight, g)
                     causal_out = g(

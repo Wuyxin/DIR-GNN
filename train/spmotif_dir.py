@@ -17,7 +17,7 @@ from torch.autograd import grad
 from utils.logger import Logger
 from datetime import datetime
 from utils.helper import set_seed, args_print
-from utils.get_subgraph import split_batch, relabel
+from utils.get_subgraph import split_graph, split_batch, relabel
 from gnn import SPMotifNet
 
 
@@ -42,38 +42,21 @@ class CausalAttNet(nn.Module):
 
         row, col = data.edge_index
         edge_rep = torch.cat([x[row], x[col]], dim=-1)
-        pred_edge_weight = self.mlp(edge_rep).view(-1)
+        edge_score = self.mlp(edge_rep).view(-1)
 
-        causal_edge_index = torch.LongTensor([[],[]]).to(data.x.device)
-        causal_edge_weight = torch.tensor([]).to(data.x.device)
-        causal_edge_attr = torch.tensor([]).to(data.x.device)
-        conf_edge_index = torch.LongTensor([[],[]]).to(data.x.device)
-        conf_edge_weight = torch.tensor([]).to(data.x.device)
-        conf_edge_attr = torch.tensor([]).to(data.x.device)
+        row, col = data.edge_index
+        edge_rep = torch.cat([x[row], x[col]], dim=-1)
+        edge_score = self.mlp(edge_rep).view(-1)
 
-        edge_indices, _, _, num_edges, cum_edges = split_batch(data)
-        for edge_index, N, C in zip(edge_indices, num_edges, cum_edges):
-            n_reserve =  int(self.ratio * N)
-            edge_attr = data.edge_attr[C:C+N]
-            single_mask = pred_edge_weight[C:C+N]
-            single_mask_detach = pred_edge_weight[C:C+N].detach().cpu().numpy()
-            rank = np.argpartition(-single_mask_detach, n_reserve)
-            idx_reserve, idx_drop = rank[:n_reserve], rank[n_reserve:]
+        (causal_edge_index, causal_edge_attr, causal_edge_weight), \
+        (conf_edge_index, conf_edge_attr, conf_edge_weight) = split_graph(data,edge_score, self.ratio)
 
-            causal_edge_index = torch.cat([causal_edge_index, edge_index[:, idx_reserve]], dim=1)
-            conf_edge_index = torch.cat([conf_edge_index, edge_index[:, idx_drop]], dim=1)
-
-            causal_edge_weight = torch.cat([causal_edge_weight, single_mask[idx_reserve]])
-            conf_edge_weight = torch.cat([conf_edge_weight,  -1 * single_mask[idx_drop]])
-
-            causal_edge_attr = torch.cat([causal_edge_attr, edge_attr[idx_reserve]])
-            conf_edge_attr = torch.cat([conf_edge_attr, edge_attr[idx_drop]])
         causal_x, causal_edge_index, causal_batch, _ = relabel(x, causal_edge_index, data.batch)
         conf_x, conf_edge_index, conf_batch, _ = relabel(x, conf_edge_index, data.batch)
 
         return (causal_x, causal_edge_index, causal_edge_attr, causal_edge_weight, causal_batch),\
                 (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch),\
-                pred_edge_weight
+                edge_score
 
 if __name__ == "__main__":
         
@@ -123,10 +106,7 @@ if __name__ == "__main__":
         g = SPMotifNet(args.channels).to(device)
         att_net = CausalAttNet(args.r).to(device)
         model_optimizer = torch.optim.Adam(
-            list(g.node_emb.parameters()) +
-            list(g.convs.parameters()) +
-            list(g.relus.parameters()) +
-            list(g.causal_mlp.parameters()) +
+            list(g.parameters()) +
             list(att_net.parameters()),
             lr=args.net_lr)
         conf_opt = torch.optim.Adam(g.conf_fw.parameters(), lr=args.net_lr)
@@ -170,8 +150,8 @@ if __name__ == "__main__":
             precision_lst, mrr_lst =  torch.FloatTensor([]), torch.FloatTensor([])
             for graph in loader: 
                 graph.to(device)
-                causal_g, conf_g, pred_edge_weight = att_net(graph)
-                precision, mrr = metrics_batch(graph, pred_edge_weight)
+                causal_g, conf_g, edge_score = att_net(graph)
+                precision, mrr = metrics_batch(graph, edge_score)
                 precision_lst = torch.cat([precision_lst, precision])
                 mrr_lst = torch.cat([mrr_lst, mrr])
             return torch.mean(precision_lst), torch.mean(mrr_lst)
@@ -182,7 +162,7 @@ if __name__ == "__main__":
                 graph.to(device)
                 
                 (causal_x, causal_edge_index, causal_edge_attr, causal_edge_weight, causal_batch),\
-                (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch), pred_edge_weight = att_net(graph)
+                (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch), edge_score = att_net(graph)
                 set_masks(causal_edge_weight, g)
                 out = predictor(x=causal_x, edge_index=causal_edge_index, 
                         edge_attr=causal_edge_attr, batch=causal_batch)
@@ -209,7 +189,7 @@ if __name__ == "__main__":
                 graph.to(device)
                 N = graph.num_graphs
                 (causal_x, causal_edge_index, causal_edge_attr, causal_edge_weight, causal_batch),\
-                (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch), pred_edge_weight = att_net(graph)
+                (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch), edge_score = att_net(graph)
 
                 set_masks(causal_edge_weight, g)
                 causal_rep = g.get_graph_rep(
@@ -254,7 +234,6 @@ if __name__ == "__main__":
             model_optimizer.zero_grad()
             all_loss.backward()
             model_optimizer.step()
-            torch.cuda.empty_cache()
             val_mode()
             with torch.no_grad():
                 test_prec, test_mrr = test_metrics(test_loader, att_net)
@@ -267,7 +246,7 @@ if __name__ == "__main__":
                 for graph in test_loader: 
                     graph.to(device)
                     (causal_x, causal_edge_index, causal_edge_attr, causal_edge_weight, causal_batch),\
-                    (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch), pred_edge_weight = att_net(graph)
+                    (conf_x, conf_edge_index, conf_edge_attr, conf_edge_weight, conf_batch), edge_score = att_net(graph)
                     
                     set_masks(causal_edge_weight, g)
                     causal_out = g(
