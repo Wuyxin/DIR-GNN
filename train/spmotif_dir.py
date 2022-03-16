@@ -59,7 +59,7 @@ class CausalAttNet(nn.Module):
                 edge_score
 
 if __name__ == "__main__":
-        
+            
     parser = argparse.ArgumentParser(description='Training for Causal Feature Learning')
     parser.add_argument('--cuda', default=0, type=int, help='cuda device')
     parser.add_argument('--datadir', default='data/', type=str, help='directory for datasets.')
