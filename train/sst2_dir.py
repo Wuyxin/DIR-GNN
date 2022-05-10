@@ -244,7 +244,7 @@ if __name__ == "__main__":
         torch.save(att_net.cpu(), osp.join(exp_dir, 'attention_net-%d.pt' % seed))
         logger.info("=" * 100)
 
-    logger.info("Causal ACC:{:.4f}-+-{:.4f}  Conf ACC:{:.4f}-+-{:.4f}  Train ACC:{:.4f}-+-{:.4f}  Val ACC:{:.4f}-+-{:.4f}".format(
+    logger.info("Causal ACC:{:.4f}±{:.4f}  Conf ACC:{:.4f}±{:.4f}  Train ACC:{:.4f}±{:.4f}  Val ACC:{:.4f}±{:.4f}".format(
                     torch.tensor(all_info['causal_acc']).mean(), torch.tensor(all_info['causal_acc']).std(),
                     torch.tensor(all_info['conf_acc']).mean(), torch.tensor(all_info['conf_acc']).std(),
                     torch.tensor(all_info['train_acc']).mean(), torch.tensor(all_info['train_acc']).std(),
