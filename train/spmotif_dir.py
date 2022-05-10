@@ -65,7 +65,7 @@ if __name__ == "__main__":
     parser.add_argument('--datadir', default='data/', type=str, help='directory for datasets.')
     parser.add_argument('--epoch', default=400, type=int, help='training iterations')
     parser.add_argument('--reg', default=1, type=int)
-    parser.add_argument('--seed',  nargs='?', default='[1]', help='random seed')
+    parser.add_argument('--seed',  nargs='?', default='[1,2,3]', help='random seed')
     parser.add_argument('--channels', default=32, type=int, help='width of network')
     parser.add_argument('--commit', default='', type=str, help='experiment name')
     parser.add_argument('--bias', default='0.9', type=str, help='select bias extend')
