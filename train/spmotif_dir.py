@@ -93,7 +93,8 @@ if __name__ == "__main__":
     # log
     datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
     all_info = { 'causal_acc':[], 'conf_acc':[], 'train_acc':[], 'val_acc':[], 'test_prec':[], 'train_prec':[], 'test_mrr':[], 'train_mrr':[]}
-    experiment_name = f'spmotif-{args.bias}.{bool(args.reg)}.{args.commit}.netlr_{args.net_lr}.batch_{args.batch_size}.channels_{args.channels}.pretrain_{args.pretrain}.r_{args.r}.alpha_{args.alpha}.seed_{args.seed}.{datetime_now}'
+    experiment_name = f'spmotif-{args.bias}.{bool(args.reg)}.{args.commit}.netlr_{args.net_lr}.batch_{args.batch_size}'\
+                      f'.channels_{args.channels}.pretrain_{args.pretrain}.r_{args.r}.alpha_{args.alpha}.seed_{args.seed}.{datetime_now}'
     exp_dir = osp.join('local/', experiment_name)
     os.makedirs(exp_dir, exist_ok=True)
     logger = Logger.init_logger(filename=exp_dir + '/_output_.log')

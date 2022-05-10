@@ -90,7 +90,8 @@ if __name__ == "__main__":
     # log
     datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
     all_info = { 'causal_acc':[], 'conf_acc':[], 'train_acc':[], 'val_acc':[]}
-    experiment_name = f'graphsst2.{args.type}.{bool(args.reg)}.{args.commit}.netlr_{args.net_lr}.batch_{args.batch_size}.channels_{args.channels}.pretrain_{args.pretrain}.r_{args.r}.alpha_{args.alpha}.seed_{args.seed}.{datetime_now}'
+    experiment_name = f'graphsst2.{args.type}.{bool(args.reg)}.{args.commit}.netlr_{args.net_lr}.batch_{args.batch_size}'\
+                      f'.channels_{args.channels}.pretrain_{args.pretrain}.r_{args.r}.alpha_{args.alpha}.seed_{args.seed}.{datetime_now}'
     exp_dir = osp.join('local/', experiment_name)
     os.mkdir(exp_dir)
     logger = Logger.init_logger(filename=exp_dir + '/_output_.log')
