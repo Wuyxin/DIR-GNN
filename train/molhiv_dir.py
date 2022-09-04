@@ -79,7 +79,7 @@ if __name__ == "__main__":
     parser.add_argument('--alpha', default=1e-4, type=float, help='invariant loss')
     parser.add_argument('--r', default=0.8, type=float, help='causal_ratio')
     # basic
-    parser.add_argument('--batch_size', default=32, type=int, help='batch size')
+    parser.add_argument('--batch_size', default=64, type=int, help='batch size')
     parser.add_argument('--net_lr', default=1e-5, type=float, help='learning rate for the predictor')
     args = parser.parse_args()
     args.seed = eval(args.seed)
