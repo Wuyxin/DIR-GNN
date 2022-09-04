@@ -24,7 +24,7 @@ class CausalAttNet(nn.Module):
     
     def __init__(self, causal_ratio):
         super(CausalAttNet, self).__init__()
-        self.gnn_node = GINVirtual_node(num_layers=2, emb_dim=args.channels, dropout=0)
+        self.gnn_node = GINVirtual_node(num_layers=2, emb_dim=300, dropout=0)
         self.linear = nn.Linear(args.channels*2, 1)
         self.ratio = causal_ratio
     def forward(self, data):
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     parser.add_argument('--datadir', default='data/', type=str, help='directory for datasets.')
     parser.add_argument('--epoch', default=400, type=int, help='training iterations')
     parser.add_argument('--reg', default=1, type=int)
-    parser.add_argument('--seed',  nargs='?', default='[1,2,3]', help='random seed')
+    parser.add_argument('--seed',  nargs='?', default='[1,2,3,4,5]', help='random seed')
     parser.add_argument('--channels', default=300, type=int, help='width of network')
     parser.add_argument('--commit', default='', type=str, help='experiment name')
     # hyper 
@@ -79,11 +79,12 @@ if __name__ == "__main__":
     parser.add_argument('--alpha', default=1e-4, type=float, help='invariant loss')
     parser.add_argument('--r', default=0.8, type=float, help='causal_ratio')
     # basic
-    parser.add_argument('--batch_size', default=64, type=int, help='batch size')
+    parser.add_argument('--batch_size', default=32, type=int, help='batch size')
     parser.add_argument('--net_lr', default=1e-5, type=float, help='learning rate for the predictor')
     args = parser.parse_args()
     args.seed = eval(args.seed)
-    device = torch.device('cuda:%d' % args.cuda if torch.cuda.is_available() else 'cpu')
+    os.environ['CUDA_VISIBLE_DEVICES'] = f"{args.cuda}"
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # dataset
     dataset = PygGraphPropPredDataset(name = 'ogbg-molhiv') 
     split_idx = dataset.get_idx_split() 
@@ -95,8 +96,8 @@ if __name__ == "__main__":
     # logger
     datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
     all_info = { 'causal_auc':[], 'train_auc':[], 'val_auc':[]}
-    experiment_name = f'molhiv.{bool(args.reg)}.{args.commit}.netlr_{args.net_lr}.batch_{args.batch_size}'\
-                        f'.channels_{args.channels}.pretrain_{args.pretrain}.r_{args.r}.alpha_{args.alpha}.seed_{args.seed}.{datetime_now}'
+    # device = torch.device('cuda:%d' % args.cuda if torch.cuda.is_available() else 'cpu')
+    experiment_name = f'molhiv.{bool(args.reg)}.{args.commit}.netlr_{args.net_lr}.batch_{args.batch_size}.channels_{args.channels}.pretrain_{args.pretrain}.r_{args.r}.alpha_{args.alpha}.seed_{args.seed}.{datetime_now}'
     exp_dir = osp.join('local/', experiment_name)
     os.mkdir(exp_dir)
     logger = Logger.init_logger(filename=exp_dir + '/_output_.log')
@@ -238,7 +239,7 @@ if __name__ == "__main__":
         torch.save(att_net.cpu(), osp.join(exp_dir, 'attention_net-%d.pt' % seed))
         logger.info("=" * 100)
 
-    logger.info("Causal AP:{:.4f}±{:.4f}  Train AP:{:.4f}±{:.4f}  Val AP:{:.4f}±{:.4f}".format(
+    logger.info("Causal AP:{:.4f}-+-{:.4f}  Train AP:{:.4f}-+-{:.4f}  Val AP:{:.4f}-+-{:.4f}".format(
                     torch.tensor(all_info['causal_auc']).mean(), torch.tensor(all_info['causal_auc']).std(),
                     torch.tensor(all_info['train_auc']).mean(), torch.tensor(all_info['train_auc']).std(),
                     torch.tensor(all_info['val_auc']).mean(), torch.tensor(all_info['val_auc']).std()
