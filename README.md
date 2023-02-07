@@ -6,7 +6,7 @@ Discovering Invariant Rationales for Graph Neural Networks 🔥
 
 [![](https://img.shields.io/badge/paper-pink?style=plastic&logo=GitBook)](https://openreview.net/pdf?id=hGXij5rfiHw)
 [![](https://img.shields.io/badge/-github-grey?style=plastic&logo=github)](https://github.com/Wuyxin/DIR-GNN) 
-[![](https://img.shields.io/badge/video-red?style=plastic&logo=airplayvideo)](https://iclr.cc/virtual/2022/session/8354#sl-video-6555) 
+[![](https://img.shields.io/badge/video-red?style=plastic&logo=airplayvideo)](https://www.youtube.com/watch?v=9d0eXaO_kOw) 
 </div>
 
 
