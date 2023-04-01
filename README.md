@@ -50,6 +50,9 @@ The hyper-parameters used to train the intrinsic interpretable models are set as
 
 Simply run `python -m train.{dataset}_dir` to reproduce the results in the paper. 
 
+## Common Questions:
+
+How are the parameters of Rationale Generator updated?: https://github.com/Wuyxin/DIR-GNN/issues/7
 
 ## Reference 
 ```
