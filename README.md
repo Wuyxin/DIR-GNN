@@ -1,6 +1,6 @@
-<h2 align="center">
+<h1 align="center">
 Discovering Invariant Rationales for Graph Neural Networks 🔥
-</h2>
+</h1>
 
 <div align="center">
 
