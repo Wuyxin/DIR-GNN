@@ -37,7 +37,7 @@ Discovering Invariant Rationales for Graph Neural Networks 🔥
 
 ## Installation
 
-Note that **we require `1.7.0 <= torch_geometric <= 2.0.2`**. Simple run the cmd to install the python environment or see `requirements.txt` for the packages.
+Note that **we require `1.7.0 <= torch_geometric <= 2.0.2`**. Simple run the cmd to install the python environment (you may want to change cudatoolkit accordingly based on your cuda version) or see `requirements.txt` for the packages.
 ```
 sh setup_env.sh
 conda activate dir
