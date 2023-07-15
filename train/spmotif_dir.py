@@ -64,10 +64,10 @@ if __name__ == "__main__":
     parser.add_argument('--cuda', default=0, type=int, help='cuda device')
     parser.add_argument('--datadir', default='data/', type=str, help='directory for datasets.')
     parser.add_argument('--epoch', default=400, type=int, help='training iterations')
-    parser.add_argument('--reg', default=1, type=int)
+    parser.add_argument('--reg', default=True, type=bool)
     parser.add_argument('--seed',  nargs='?', default='[1,2,3]', help='random seed')
     parser.add_argument('--channels', default=32, type=int, help='width of network')
-    parser.add_argument('--commit', default='', type=str, help='experiment name')
+    parser.add_argument('--exp_name', default='', type=str, help='experiment name')
     parser.add_argument('--bias', default='0.9', type=str, help='select bias extend')
     # hyper 
     parser.add_argument('--pretrain', default=10, type=int, help='pretrain epoch')
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     # log
     datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
     all_info = { 'causal_acc':[], 'conf_acc':[], 'train_acc':[], 'val_acc':[], 'test_prec':[], 'train_prec':[], 'test_mrr':[], 'train_mrr':[]}
-    experiment_name = f'spmotif-{args.bias}.{bool(args.reg)}.{args.commit}.netlr_{args.net_lr}.batch_{args.batch_size}'\
+    experiment_name = f'spmotif-{args.bias}.{args.reg}.{args.exp_name}.netlr_{args.net_lr}.batch_{args.batch_size}'\
                       f'.channels_{args.channels}.pretrain_{args.pretrain}.r_{args.r}.alpha_{args.alpha}.seed_{args.seed}.{datetime_now}'
     exp_dir = osp.join('local/', experiment_name)
     os.makedirs(exp_dir, exist_ok=True)
@@ -179,7 +179,6 @@ if __name__ == "__main__":
                 
             causal_edge_weights = torch.tensor([]).to(device)
             conf_edge_weights = torch.tensor([]).to(device)
-            reg = args.reg
             alpha_prime = args.alpha * (epoch ** 1.6)
             all_loss, n_bw, all_env_loss = 0, 0, 0
             all_causal_loss, all_conf_loss, all_var_loss = 0, 0, 0

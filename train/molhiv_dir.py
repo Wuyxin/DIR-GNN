@@ -70,7 +70,7 @@ if __name__ == "__main__":
     parser.add_argument('--cuda', default=0, type=int, help='cuda device')
     parser.add_argument('--datadir', default='data/', type=str, help='directory for datasets.')
     parser.add_argument('--epoch', default=400, type=int, help='training iterations')
-    parser.add_argument('--reg', default=1, type=int)
+    parser.add_argument('--reg', default=True, type=bool)
     parser.add_argument('--seed',  nargs='?', default='[1,2,3,4,5]', help='random seed')
     parser.add_argument('--channels', default=300, type=int, help='width of network')
     parser.add_argument('--commit', default='', type=str, help='experiment name')
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     os.environ['CUDA_VISIBLE_DEVICES'] = f"{args.cuda}"
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # dataset
-    dataset = PygGraphPropPredDataset(name = 'ogbg-molhiv') 
+    dataset = PygGraphPropPredDataset(name = 'ogbg-molhiv', root='data') 
     split_idx = dataset.get_idx_split() 
     train_loader = DataLoader(dataset[split_idx["train"]], batch_size=args.batch_size, shuffle=True)
     val_loader = DataLoader(dataset[split_idx["valid"]], batch_size=args.batch_size, shuffle=False)
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
     all_info = { 'causal_auc':[], 'train_auc':[], 'val_auc':[]}
     # device = torch.device('cuda:%d' % args.cuda if torch.cuda.is_available() else 'cpu')
-    experiment_name = f'molhiv.{bool(args.reg)}.{args.commit}.netlr_{args.net_lr}.batch_{args.batch_size}.channels_{args.channels}.pretrain_{args.pretrain}.r_{args.r}.alpha_{args.alpha}.seed_{args.seed}.{datetime_now}'
+    experiment_name = f'molhiv.{args.reg}.{args.commit}.netlr_{args.net_lr}.batch_{args.batch_size}.channels_{args.channels}.pretrain_{args.pretrain}.r_{args.r}.alpha_{args.alpha}.seed_{args.seed}.{datetime_now}'
     exp_dir = osp.join('local/', experiment_name)
     os.mkdir(exp_dir)
     logger = Logger.init_logger(filename=exp_dir + '/_output_.log')

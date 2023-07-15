@@ -19,7 +19,7 @@ figsize = (8, 6)
 
 def find_gd(edge_index, ids):
     row, col = edge_index
-    gd = np.array(ids[row] > 0, dtype=np.float) * np.array(ids[col] > 0, dtype=np.float)
+    gd = np.array(ids[row] > 0, dtype=np.float64) * np.array(ids[col] > 0, dtype=np.float64)
     
     return gd
 ####################################

@@ -35,10 +35,16 @@ Discovering Invariant Rationales for Graph Neural Networks 🔥
     See our paper for the formal description and the principle behind it. 
 
 
-
 ## Installation
-- Main packages: PyTorch >= 1.5.0, Pytorch Geometric >= 1.7.0, OGB >= 1.3.0. 
-- See `requirements.txt` for other packages.
+
+Note that **we require `1.7.0 <= torch_geometric <= 2.0.2`**. Simple run the cmd to install the python environment or see `requirements.txt` for the packages.
+```
+sh setup_env.sh
+conda activate dir
+```
+
+<!-- - Main packages: PyTorch >= 1.5.0, 2.0.2 >= Pytorch Geometric >= 1.7.0, OGB >= 1.3.0. 
+- See `requirements.txt` for other packages. -->
 
 ## Data download
 - Spurious-Motif: this dataset can be generated via `spmotif_gen/spmotif.ipynb`. 
@@ -48,7 +54,7 @@ Discovering Invariant Rationales for Graph Neural Networks 🔥
 ## Run DIR
 The hyper-parameters used to train the intrinsic interpretable models are set as default in the `argparse.ArgumentParser` in the training files. Feel free to change them if needed. We use separate files to train each dataset.
 
-Simply run `python -m train.{dataset}_dir` to reproduce the results in the paper. 
+Simply run `python -m train.{dataset}_dir --alpha xxx  --r yyy` to reproduce the results in the paper. We set the causal feature ratio $r$ and $alpha$ as ($r$ = 0.8, $alpha$ = 10−4 ), ($r$ = 0.25, $alpha$ = 10−2 ), ($r$ = 0.6, $alpha$ = 102 ), ($r$ = 0.8, $alpha$ = 10−3 ) for MNIST-75sp, Spurious-Motif, Graph-SST2 and OGBG-Molhiv respectively.
 
 ## Common Questions:
 
