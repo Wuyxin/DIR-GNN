@@ -54,7 +54,7 @@ conda activate dir
 ## Run DIR
 The hyper-parameters used to train the intrinsic interpretable models are set as default in the `argparse.ArgumentParser` in the training files. Feel free to change them if needed. We use separate files to train each dataset.
 
-Simply run `python -m train.{dataset}_dir --alpha xxx  --r yyy` to reproduce the results in the paper. We set the causal feature ratio $r$ and $alpha$ as ($r$ = 0.8, $alpha$ = 10−4 ), ($r$ = 0.25, $alpha$ = 10−2 ), ($r$ = 0.6, $alpha$ = 102 ), ($r$ = 0.8, $alpha$ = 10−3 ) for MNIST-75sp, Spurious-Motif, Graph-SST2 and OGBG-Molhiv respectively.
+Simply run `python -m train.{dataset}_dir` to reproduce the results in the paper. 
 
 ## Common Questions:
 
